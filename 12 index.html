@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный Исламский Конверт</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle, #1a2230 0%, #0b0f19 100%);
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 450px;
+            height: 300px;
+            perspective: 1500px;
+        }
+
+        .envelope {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d1527;
+            border: 2px solid #bba15f;
+            border-radius: 6px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 15px;
+            left: 5%;
+            width: 90%;
+            height: 85%;
+            background-color: #fcfbf7;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .letter-content {
+            font-size: 14px;
+            color: #1a2530;
+            line-height: 1.5;
+            text-align: center;
+            padding: 20px 15px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            width: 100%;
+        }
+
+        .letter-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 22px;
+            color: #8c6f2d;
+            font-family: 'Amiri', serif;
+            font-weight: bold;
+        }
+
+        .birthday-text {
+            margin: 0 0 10px 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #a81c24;
+        }
+
+        .letter-content p {
+            margin: 0;
+            font-style: italic;
+        }
+
+        .left-flap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 150px 0 150px 225px;
+            border-color: transparent transparent transparent #121b2e;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .right-flap {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 150px 225px 150px 0;
+            border-color: transparent #151e33 transparent transparent;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .bottom-flap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 225px 150px 225px;
+            border-color: transparent transparent #18233a transparent;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .envelope-svg-decor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .vertical-text-lines {
+            font-family: 'Amiri', serif;
+            font-size: 11px;
+            fill: #dfc48c;
+            text-anchor: middle;
+            opacity: 0.9;
+            writing-mode: vertical-rl;
+            letter-spacing: 4px;
+        }
+
+        .horizontal-text-line {
+            font-family: 'Amiri', serif;
+            font-size: 12px;
+            fill: #dfc48c;
+            text-anchor: middle;
+            opacity: 0.9;
+            direction: rtl;
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 150px 225px 0 225px;
+            border-color: #1a253d transparent transparent transparent;
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+            z-index: 6;
+            cursor: pointer;
+        }
+
+        .flap::after {
+            content: '';
+            position: absolute;
+            top: -148px;
+            left: -223px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 146px 223px 0 223px;
+            border-color: #0b101d transparent transparent transparent;
+        }
+
+        .ayat-kursi-inner {
+            position: absolute;
+            z-index: 7;
+            color: #bba15f;
+            font-family: 'Amiri', serif;
+            font-size: 11px;
+            text-align: center;
+            direction: rtl;
+            line-height: 1.5;
+            width: 340px;
+            height: 120px;
+            top: -142px;
+            left: -170px;
+            transform: scaleY(-1);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 8px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.4s ease 0.2s;
+        }
+
+        .ayat-kursi-inner::before {
+            content: '⚜';
+            font-size: 14px;
+            color: #dfc48c;
+            margin-bottom: 4px;
+        }
+
+        .ayat-kursi-inner p {
+            margin: 0;
+            padding: 0 15px;
+            width: 100%;
+        }
+
+        .envelope-wrapper.open-flap .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-wrapper.open-flap .ayat-kursi-inner {
+            opacity: 1;
+        }
+
+        .envelope-wrapper.pull-letter .letter {
+            transform: translateY(-185px);
+            z-index: 20;
+        }
+
+        .envelope-wrapper.pull-letter .letter-content {
+            opacity: 1;
+        }
+
+        .wax-seal-trigger {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 82px;
+            cursor: pointer;
+            z-index: 12;
+            background: radial-gradient(circle at 30% 30%, #a81c24 0%, #700d12 70%, #4a0508 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wax-seal-text {
+            position: relative;
+            font-family: 'Amiri', serif;
+            font-size: 20px;
+            font-weight: bold;
+            color: #dfc48c;
+            text-align: center;
+            direction: rtl;
+            z-index: 14;
+            user-select: none;
+            line-height: 1.1;
+        }
+
+        .envelope-wrapper.open-flap .wax-seal-trigger {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="envelope-wrapper" id="envelopeWrapper">
+
+    <div class="flap">
+        <div class="ayat-kursi-inner">
+            <p>
+                اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ
+            </p>
+        </div>
+    </div>
+
+    <div class="envelope">
+
+        <div class="letter" id="theLetter">
+            <div class="letter-content">
+
+                <h3>Ассаляму алейкум</h3>
+
+                <div class="birthday-text">
+                    Поздравляю Вас с днём рождения
+                </div>
+
+                <p>
+                    Пусть Аллах дарует вам всех благ,
+                    крепкого здоровья, бараката в жизни
+                    и успеха во всех благих делах.
+                    <br><br>
+                    Пусть Всевышний примет ваши дуа
+                    и укрепит ваш иман.
+                    <br><br>
+                    Пусть Аллах дарует благодать вашей семье,
+                    и пусть ваши дети вырастут хорошими людьми
+                    как в мирской жизни, так и в религии 🤲
+                </p>
+
+            </div>
+        </div>
+
+        <div class="left-flap"></div>
+        <div class="right-flap"></div>
+        <div class="bottom-flap"></div>
+
+        <svg class="envelope-svg-decor" viewBox="0 0 450 300">
+            <line x1="6" y1="15" x2="6" y2="285" stroke="#bba15f" stroke-width="1" opacity="0.3"/>
+            <line x1="444" y1="15" x2="444" y2="285" stroke="#bba15f" stroke-width="1" opacity="0.3"/>
+        </svg>
+
+    </div>
+
+    <div class="wax-seal-trigger" title="Открыть печать">
+        <div class="wax-seal-text">
+            بِسْمِ<br>اللَّهِ
+        </div>
+    </div>
+
+</div>
+
+<script>
+const wrapper = document.getElementById('envelopeWrapper');
+const flap = document.querySelector('.flap');
+const letter = document.getElementById('theLetter');
+const seal = document.querySelector('.wax-seal-trigger');
+
+seal.addEventListener('click', function(e) {
+    e.stopPropagation();
+    wrapper.classList.add('open-flap');
+});
+
+letter.addEventListener('click', function(e) {
+    e.stopPropagation();
+
+    if (wrapper.classList.contains('open-flap')) {
+        wrapper.classList.toggle('pull-letter');
+    }
+});
+
+flap.addEventListener('click', function(e) {
+    e.stopPropagation();
+
+    wrapper.classList.remove('pull-letter');
+
+    setTimeout(function() {
+        wrapper.classList.remove('open-flap');
+    }, 150);
+});
+</script>
+
+</body>
+</html>
